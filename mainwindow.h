@@ -17,6 +17,9 @@ public:
   ~MainWindow();
   QByteArray *bytepic;
 
+protected:
+  bool eventFilter(QObject *, QEvent *);
+
 private:
   Ui::MainWindow *ui;
 };

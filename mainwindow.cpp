@@ -11,7 +11,9 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->lineEdit->setReadOnly(true);
   ui->tabWidget->tabBar()->setTabText(0, tr("Шифр перестановки"));
   ui->tabWidget->tabBar()->setTabText(1, tr("Шифр замены"));
-  ui->orlabel->setMaximumSize(ui->frame->size());
+//  ui->orlabel->setMaximumSize(ui->frame->size());
+  ui->orlabel->setScaledContents(true);
+  ui->modlabel->setScaledContents(true);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
         ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -21,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
         bytepic = new QByteArray(file->readAll());
         QPixmap *pm = new QPixmap();
         pm->loadFromData(*bytepic);
+//        ui->orlabel->setMaximumSize(ui->frame->size());
         ui->orlabel->setPixmap(*pm);
     });
 
@@ -31,5 +34,15 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+  if(event->type() == QEvent::Resize){
+      ui->orlabel->setMaximumSize(ui->frame->size());
+      ui->modlabel->setMaximumSize(ui->frame_2->size());
+      return true;
+    }
+  return QMainWindow::eventFilter(obj, event);
 }
 
