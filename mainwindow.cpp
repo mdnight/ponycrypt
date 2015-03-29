@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QList<unsigned int> randlist = randSeq(100, 0b1000011);
+          QList<unsigned int> randlist = randSeq(100, 0b10000001001);
           //qDebug() << randlist << randlist.length();
 
           QList<QImage> tmp;
@@ -88,9 +88,11 @@ QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli)
       tmp >>= 1;
       n <<= 1;
     }
+  poli = poli & ((n - 1) >> 1);
+  n >>= 1;
+  //должно быть k < n !!!
   srand(time(0));
-  randd=random()%n; //иницилизирующее число
-  poli=poli & ((n-1)>>1);
+  randd=random() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
 
   for(unsigned int i = 0; i<n-1; i++){
       unsigned int tmp = poli & randd;
@@ -99,7 +101,7 @@ QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli)
           sum ^= (tmp & 1);
           tmp >>= 1;
         }
-      randd = (randd >> 1) | (sum << (len - 1));
+      randd = (randd >> 1) | (sum << (len - 2));
       if(randd <= k)
         res << randd;
     }
