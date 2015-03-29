@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QPainter>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -45,23 +46,29 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->pushButton_3->setMinimumSize(50,50);
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
-      QImage res(im1->size(), QImage::Format_RGB32);
-      QList<quint16> randlist = randSeq(im1->width(), (quint16)0x1100100111010);
+      if(ui->lineEdit->text().isEmpty())
+        QMessageBox::warning(this, tr("Ошибка!"),
+                             tr("Не выбран файл."), QMessageBox::Ok, QMessageBox::NoButton);
+      else {
+          QImage res(im1->size(), QImage::Format_RGB32);
+          res = *im1;
+          QList<unsigned int> randlist = randSeq(100, 0b0100101);
+          qDebug() << randlist << randlist.length();
 
-      QList<QImage> tmp;
+          QList<QImage> tmp;
 
-      quint16 h = im1->height();
-      for(auto i = 0; i < im1->width(); i++)
-          tmp << im1->copy(i,0, 1, h);
+          quint16 h = im1->height();
+          for(auto i = 0; i < im1->width(); i++)
+            tmp << im1->copy(i,0, 1, h);
 
-      QPainter pntr(&res);
+          QPainter pntr(&res);
 
-      for(auto i = 0; i < im1->width(); i++){
-          pntr.drawImage(i, 0, tmp[i]);
+          for(auto i = 0; i < im1->width(); i++){
+              pntr.drawImage(i, 0, tmp[randlist[i]-1]);
+            }
+
+          ui->modlabel->setPixmap(QPixmap::fromImage(res));
         }
-
-      pntr.end();
-      ui->modlabel->setPixmap(QPixmap::fromImage(res));
 
     });
 
@@ -72,12 +79,12 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-QList<quint16> MainWindow::randSeq(quint16 k, qint16 poli)
+QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli)
 {
-  QList<quint16> res;
-  quint16 n=1, len=0, randd;
+  QList<unsigned int> res;
+  unsigned int n=1, len=0, randd;
 
-  for(auto tmp = poli; tmp != 0; len++){
+  for(unsigned int tmp = poli; tmp != 0; len++){
       tmp >>= 1;
       n <<= 1;
     }
@@ -85,9 +92,9 @@ QList<quint16> MainWindow::randSeq(quint16 k, qint16 poli)
   randd=random()%n; //иницилизирующее число
   poli=poli & ((n-1)>>1);
 
-  for(auto i=0; i<n-1; i++){
-      auto tmp = poli & randd;
-      auto sum = 0;
+  for(unsigned int i = 0; i<n-1; i++){
+      unsigned int tmp = poli & randd;
+      unsigned int sum = 0;
       while(tmp != 0){
           sum ^= (tmp & 1);
           tmp >>= 1;
