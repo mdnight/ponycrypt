@@ -52,8 +52,8 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QList<unsigned int> randlist = randSeq(100, 0b0100101);
-          qDebug() << randlist << randlist.length();
+          QList<unsigned int> randlist = randSeq(100, 0b1000011);
+          //qDebug() << randlist << randlist.length();
 
           QList<QImage> tmp;
 
@@ -63,11 +63,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
           QPainter pntr(&res);
 
-          for(auto i = 0; i < im1->width(); i++){
+          for(int i = 0; i < im1->width(); i++){
               pntr.drawImage(i, 0, tmp[randlist[i]-1]);
+              ui->modlabel->setPixmap(QPixmap::fromImage(res));
             }
 
-          ui->modlabel->setPixmap(QPixmap::fromImage(res));
         }
 
     });

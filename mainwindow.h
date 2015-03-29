@@ -21,6 +21,9 @@ public:
   QList<unsigned int> randSeq(unsigned int k, unsigned int poli);
   QImage *im1, *im2;
 
+signals:
+  void onPixmapHasChanged();
+
 private:
   Ui::MainWindow *ui;
 };
