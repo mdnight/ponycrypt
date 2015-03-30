@@ -18,7 +18,7 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
   QByteArray *bytepic;
-  QList<unsigned int> randSeq(unsigned int k, unsigned int poli, unsigned int len);
+  QList<unsigned int> randSeq(unsigned int k, unsigned int poli, unsigned int st);
   QImage *im1, *im2;
 
 signals:
