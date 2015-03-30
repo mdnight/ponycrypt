@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->modlabel->setScaledContents(true);
   ui->orlabel_2->setScaledContents(true);
   ui->modlabel_2->setScaledContents(true);
+  ui->horizontalSlider->setEnabled(false);
+  ui->lineEdit_2->setEnabled(false);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -38,7 +40,16 @@ MainWindow::MainWindow(QWidget *parent) :
       QPixmap *pm = new QPixmap(ui->lineEdit->text());
       ui->orlabel->setPixmap(*pm);
       ui->orlabel_2->setPixmap(*pm);
+
+      ui->horizontalSlider->setEnabled(true);
+      ui->horizontalSlider->setRange(1, im1->width()*im1->height());
+      ui->lineEdit_2->setEnabled(true);
     });
+
+  QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
+                   [=](){ui->lineEdit_2->setText(QString::number(ui->horizontalSlider->value()));});
+  QObject::connect(ui->lineEdit_2, &QLineEdit::textEdited, [=](){
+                   ui->horizontalSlider->setValue(ui->lineEdit_2->text().toInt());});
 
   ui->pushButton_2->setText("=>");
   ui->pushButton_2->setMinimumSize(50,50);
@@ -52,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QList<unsigned int> randlist = randSeq(100, 0b10000001001);
+          QList<unsigned int> randlist = randSeq(im1->width(), 0b10000001001);
           //qDebug() << randlist << randlist.length();
 
           QList<QImage> tmp;
