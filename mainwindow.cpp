@@ -63,7 +63,19 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QList<unsigned int> randlist = randSeq(im1->width(), 0b10000001001);
+          QString poliS = "x10+x3+1", len_p;
+          ui->lineEdit_3->setText(poliS);  //не проверяется на пустоту строки
+          unsigned int poli = 0;
+          poliS.remove(QChar(' '), Qt::CaseInsensitive);
+          poliS.replace("+1", "+0");
+          poliS.remove(QChar('x'), Qt::CaseInsensitive);
+          poliS.replace("++", "+1+");
+          for(unsigned int b = 0; b <= poliS.count("+"); b++)
+              poli |= 1 << poliS.section('+', b, b).toUInt();
+          //qDebug() << bin << poli;
+
+          QList<unsigned int> randlist = randSeq(im1->width(), poli, poliS.section('+', 0, 0).toUInt());
+          //QList<unsigned int> randlist = randSeq(im1->width(), 0b10000001001, 10);
           //qDebug() << randlist << randlist.length();
 
           QList<QImage> tmp;
@@ -90,17 +102,14 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli)
+QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli, unsigned st) //st -- степень многочлена
 {
   QList<unsigned int> res;
-  unsigned int n=1, len=0, randd;
+  unsigned int n=1, randd;
 
-  for(unsigned int tmp = poli; tmp != 0; len++){
-      tmp >>= 1;
-      n <<= 1;
-    }
-  poli = poli & ((n - 1) >> 1);
-  n >>= 1;
+  n <<= st;
+  //qDebug() << len << n;
+  poli = poli & (((n << 1) - 1) >> 1); //убирается первая единица из полинома
   //должно быть k < n !!!
   srand(time(0));
   randd=random() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
@@ -112,7 +121,7 @@ QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli)
           sum ^= (tmp & 1);
           tmp >>= 1;
         }
-      randd = (randd >> 1) | (sum << (len - 2));
+      randd = (randd >> 1) | (sum << (st - 1));
       if(randd <= k)
         res << randd;
     }
