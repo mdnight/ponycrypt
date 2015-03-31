@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QString poliS = sel_poli((quint32)im1->width() * (quint32)im1->height()); //длину ключа должна передавать
+          QString poliS = sel_poli((quint32)ui->lineEdit_2->text().toUInt()); //длину ключа должна передавать
           if(poliS == "!")
               QMessageBox::warning(this, tr("Ошибка!"),
                                    tr("Нет подходящего полинома под данную длину ключа."), QMessageBox::Ok, QMessageBox::NoButton);
@@ -75,10 +75,10 @@ MainWindow::MainWindow(QWidget *parent) :
               poliS.remove(QChar('x'), Qt::CaseInsensitive);
               poliS.replace("++", "+1+");
               for(int b = 0; b <= poliS.count("+"); b++)
-                  poli |= 1 << poliS.section('+', b, b).toUInt();
+                  poli |= 1 << (quint32)poliS.section('+', b, b).toUInt();
               //qDebug() << bin << poli;
 
-              QList<quint32> randlist = randSeq((quint32)im1->width(), poli, (quint32)poliS.section('+', 0, 0).toUInt());
+              QList<quint32> randlist = randSeq((quint32)ui->lineEdit_2->text().toUInt(), poli, (quint32)poliS.section('+', 0, 0).toUInt());
               //qDebug() << randlist << randlist.length();
 
               QList<QImage> tmp;
