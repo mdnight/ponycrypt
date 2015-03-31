@@ -64,13 +64,13 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QString poliS = sel_poli(10000); //длину ключа должна передавать
+          QString poliS = sel_poli((quint32)im1->width() * (quint32)im1->height()); //длину ключа должна передавать
           if(poliS == "!")
               QMessageBox::warning(this, tr("Ошибка!"),
                                    tr("Нет подходящего полинома под данную длину ключа."), QMessageBox::Ok, QMessageBox::NoButton);
           else{
               ui->lineEdit_3->setText(poliS);
-              unsigned int poli = 0;
+              quint32 poli = 0;
               poliS.replace("+1", "+0");
               poliS.remove(QChar('x'), Qt::CaseInsensitive);
               poliS.replace("++", "+1+");
@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
                   poli |= 1 << poliS.section('+', b, b).toUInt();
               //qDebug() << bin << poli;
 
-              QList<unsigned int> randlist = randSeq(im1->width(), poli, poliS.section('+', 0, 0).toUInt());
+              QList<quint32> randlist = randSeq((quint32)im1->width(), poli, (quint32)poliS.section('+', 0, 0).toUInt());
               //qDebug() << randlist << randlist.length();
 
               QList<QImage> tmp;
@@ -108,10 +108,10 @@ MainWindow::~MainWindow()
   delete divs;
 }
 
-QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli, unsigned st) //st -- степень многочлена
+QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- степень многочлена
 {
-  QList<unsigned int> res;
-  unsigned int n=1, randd;
+  QList<quint32> res;
+  quint32 n=1, randd;
 
   n <<= st;
   //qDebug() << len << n;
@@ -120,9 +120,9 @@ QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli, unsigned 
   srand(time(0));
   randd=random() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
 
-  for(unsigned int i = 0; i<n-1; i++){
-      unsigned int tmp = poli & randd;
-      unsigned int sum = 0;
+  for(quint32 i = 0; i<n-1; i++){
+      quint32 tmp = poli & randd;
+      quint32 sum = 0;
       while(tmp != 0){
           sum ^= (tmp & 1);
           tmp >>= 1;
@@ -160,7 +160,7 @@ QVector<quint32> MainWindow::dividers(quint32 n)
   return divs;
 }
 
-QString MainWindow::sel_poli(unsigned int len_key) //выбор полинома
+QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
 {
     QList<QString> poli_list;
     poli_list << "x5+x2+1" << "x6+x1+1" << "x7+x3+1" << "x9+x4+1" << "x10+x3+1"
@@ -170,9 +170,9 @@ QString MainWindow::sel_poli(unsigned int len_key) //выбор полинома
               << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"
 //              << "x39+x4+1" << "x41+x20+1" << "x47+x20+1" << "x49+x22+1";
 
-    unsigned int bit_key = 0; //количество бит в длине ключа
+    quint32 bit_key = 0; //количество бит в длине ключа
 
-    for(unsigned int tmp = len_key; tmp != 0; bit_key++){
+    for(quint32 tmp = len_key; tmp != 0; bit_key++){
         tmp >>= 1;
     }
     //qDebug() << bit_key;
