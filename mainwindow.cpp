@@ -13,11 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->lineEdit->setReadOnly(true);
   ui->tabWidget->tabBar()->setTabText(0, tr("Шифр перестановки"));
   ui->tabWidget->tabBar()->setTabText(1, tr("Шифр замены"));
-//  ui->orlabel->setMaximumSize(ui->frame->size());
   ui->orlabel->setScaledContents(true);
   ui->modlabel->setScaledContents(true);
   ui->orlabel_2->setScaledContents(true);
   ui->modlabel_2->setScaledContents(true);
+  ui->horizontalSlider->setSingleStep(1);
   ui->horizontalSlider->setEnabled(false);
   ui->lineEdit_2->setEnabled(false);
 
@@ -41,13 +41,14 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->orlabel->setPixmap(*pm);
       ui->orlabel_2->setPixmap(*pm);
 
+      divs = new QVector<quint32>(dividers(im1->width()*im1->height()));
+      qDebug() << *divs;
+      ui->horizontalSlider->setRange(0, divs->size() - 1);
       ui->horizontalSlider->setEnabled(true);
-      ui->horizontalSlider->setRange(1, im1->width()*im1->height());
-      ui->lineEdit_2->setEnabled(true);
     });
 
   QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
-                   [=](){ui->lineEdit_2->setText(QString::number(ui->horizontalSlider->value()));});
+                   [=](){ui->lineEdit_2->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
   QObject::connect(ui->lineEdit_2, &QLineEdit::textEdited, [=](){
                    ui->horizontalSlider->setValue(ui->lineEdit_2->text().toInt());});
 
@@ -100,6 +101,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
+  delete im1;
+  delete im2;
+  delete divs;
 }
 
 QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli, unsigned st) //st -- степень многочлена
@@ -127,3 +131,30 @@ QList<unsigned int> MainWindow::randSeq(unsigned int k, unsigned poli, unsigned 
     }
   return res;
 }
+
+QVector<quint32> MainWindow::dividers(quint32 n)
+{
+  if (n == 0)
+    return QVector<quint32>();
+
+  // Вектор делителей (пока содержит только само число)
+  QVector<quint32> divs(1, n);
+
+  // Если проверяем 1 - выводим уже готовый вектор, содержащий только саму 1
+  if (n == 1)
+    return divs;
+
+  // делителем n
+  for (quint32 d = n / 2; d > 1; --d)
+    // Проверка на делимость нацело
+    if (n % d == 0)
+      // Если очередное число является делителем, добавляем его в вектор
+      divs.push_back(d);
+
+  // Добавляем делитель любого из чисел - 1
+  divs.push_back(1);
+
+  // Возвращаем найденные делители
+  return divs;
+}
+     // Идём по всем числам от n / 2 до 1 и проверяем каждое, является ли оно
