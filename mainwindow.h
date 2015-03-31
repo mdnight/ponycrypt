@@ -21,6 +21,7 @@ public:
   QList<unsigned int> randSeq(unsigned int k, unsigned int poli, unsigned int st);
   QImage *im1, *im2;
   QVector<quint32> dividers(quint32 n);
+  QString sel_poli(unsigned int len_key);
 
 signals:
   void onPixmapHasChanged();

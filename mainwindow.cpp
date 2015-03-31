@@ -64,34 +64,36 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QString poliS = "x10+x3+1", len_p;
-          ui->lineEdit_3->setText(poliS);  //не проверяется на пустоту строки
-          unsigned int poli = 0;
-          poliS.remove(QChar(' '), Qt::CaseInsensitive);
-          poliS.replace("+1", "+0");
-          poliS.remove(QChar('x'), Qt::CaseInsensitive);
-          poliS.replace("++", "+1+");
-          for(unsigned int b = 0; b <= poliS.count("+"); b++)
-              poli |= 1 << poliS.section('+', b, b).toUInt();
-          //qDebug() << bin << poli;
+          QString poliS = sel_poli(10000); //длину ключа должна передавать
+          if(poliS == "!")
+              QMessageBox::warning(this, tr("Ошибка!"),
+                                   tr("Нет подходящего полинома под данную длину ключа."), QMessageBox::Ok, QMessageBox::NoButton);
+          else{
+              ui->lineEdit_3->setText(poliS);
+              unsigned int poli = 0;
+              poliS.replace("+1", "+0");
+              poliS.remove(QChar('x'), Qt::CaseInsensitive);
+              poliS.replace("++", "+1+");
+              for(int b = 0; b <= poliS.count("+"); b++)
+                  poli |= 1 << poliS.section('+', b, b).toUInt();
+              //qDebug() << bin << poli;
 
-          QList<unsigned int> randlist = randSeq(im1->width(), poli, poliS.section('+', 0, 0).toUInt());
-          //QList<unsigned int> randlist = randSeq(im1->width(), 0b10000001001, 10);
-          //qDebug() << randlist << randlist.length();
+              QList<unsigned int> randlist = randSeq(im1->width(), poli, poliS.section('+', 0, 0).toUInt());
+              //qDebug() << randlist << randlist.length();
 
-          QList<QImage> tmp;
+              QList<QImage> tmp;
 
-          quint16 h = im1->height();
-          for(auto i = 0; i < im1->width(); i++)
-            tmp << im1->copy(i,0, 1, h);
+              quint16 h = im1->height();
+              for(auto i = 0; i < im1->width(); i++)
+                tmp << im1->copy(i,0, 1, h);
 
-          QPainter pntr(&res);
+              QPainter pntr(&res);
 
-          for(int i = 0; i < im1->width(); i++){
-              pntr.drawImage(i, 0, tmp[randlist[i]-1]);
-              ui->modlabel->setPixmap(QPixmap::fromImage(res));
-            }
-
+              for(int i = 0; i < im1->width(); i++){
+                  pntr.drawImage(i, 0, tmp[randlist[i]-1]);
+                  ui->modlabel->setPixmap(QPixmap::fromImage(res));
+              }
+          }
         }
 
     });
@@ -152,9 +154,34 @@ QVector<quint32> MainWindow::dividers(quint32 n)
       divs.push_back(d);
 
   // Добавляем делитель любого из чисел - 1
-  divs.push_back(1);
+  //divs.push_back(1);
 
   // Возвращаем найденные делители
   return divs;
 }
-     // Идём по всем числам от n / 2 до 1 и проверяем каждое, является ли оно
+
+QString MainWindow::sel_poli(unsigned int len_key) //выбор полинома
+{
+    QList<QString> poli_list;
+    poli_list << "x5+x2+1" << "x6+x1+1" << "x7+x3+1" << "x9+x4+1" << "x10+x3+1"
+              << "x11+x2+1" << "x12+x1+1" << "x13+x1+1" << "x14+x1+1" << "x15+x4+1"
+              << "x16+x7+1" << "x17+x3+1" << "x18+x7+1" << "x19+x7+1" << "x20+x3+1"
+              << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x9+1"
+              << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"
+//              << "x39+x4+1" << "x41+x20+1" << "x47+x20+1" << "x49+x22+1";
+
+    unsigned int bit_key = 0; //количество бит в длине ключа
+
+    for(unsigned int tmp = len_key; tmp != 0; bit_key++){
+        tmp >>= 1;
+    }
+    //qDebug() << bit_key;
+    QString poli;
+    for(int i = 0; i < poli_list.size(); i++){
+        poli = poli_list.at(i);
+        if(poli.section('+', 0, 0).remove(QChar('x')).toUInt() > bit_key)
+            return poli;
+    }
+    //qDebug() << "выбранный полином: " << poli;
+    return "!";
+}
