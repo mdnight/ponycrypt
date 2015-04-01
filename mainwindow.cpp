@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
       qDebug() << *divs;
       ui->horizontalSlider->setRange(0, divs->size() - 1);
       ui->horizontalSlider->setEnabled(true);
+      ui->horizontalSlider->setValue(1);
+      ui->horizontalSlider->setValue(0);
     });
 
   QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
@@ -93,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
                    block += (quint32)randlist.length()){
 //                   qDebug() << block;
                    for(quint32 i = 0; i < (quint32)randlist.length(); i++){
-                       pixelList.swap(i + block, randlist[i]-1 + block);   //вроде работает, но хз
+                       pixelList.swap(i + block, randlist[i] - 1 + block);   //вроде работает, но хз
                      }
                  }
 
