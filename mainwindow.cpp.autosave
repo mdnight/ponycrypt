@@ -79,8 +79,6 @@ MainWindow::MainWindow(QWidget *parent) :
               poliS.replace("++", "+1+");
               for(int b = 0; b <= poliS.count("+"); b++)
                   poli |= 1 << (quint32)poliS.section('+', b, b).toUInt();
-              //qDebug() << bin << poli;
-
               QList<quint32> randlist = randSeq((quint32)ui->lineEdit_2->text().toUInt(),
                                                 poli, (quint32)poliS.section('+', 0, 0).toUInt());
               QList<QRgb> pixelList;
@@ -89,11 +87,8 @@ MainWindow::MainWindow(QWidget *parent) :
                  for(quint32 w = 0; w < (quint32)im1->width(); w++)
                      pixelList << im1->pixel(w, h);
 
-
-//               qDebug() << randlist.length();
                for(quint32 block = 0; block < (quint32)pixelList.length();
                    block += (quint32)randlist.length()){
-//                   qDebug() << block;
                    for(quint32 i = 0; i < (quint32)randlist.length(); i++){
                        pixelList.swap(i + block, randlist[i] - 1 + block);   //вроде работает, но хз
                      }
