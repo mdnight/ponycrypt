@@ -67,7 +67,8 @@ MainWindow::MainWindow(QWidget *parent) :
           QString poliS = sel_poli((quint32)ui->lineEdit_2->text().toUInt()); //длину ключа должна передавать
           if(poliS == "!")
               QMessageBox::warning(this, tr("Ошибка!"),
-                                   tr("Нет подходящего полинома под данную длину ключа."), QMessageBox::Ok, QMessageBox::NoButton);
+                                   tr("Нет подходящего полинома под данную длину ключа."),
+                                   QMessageBox::Ok, QMessageBox::NoButton);
           else{
               ui->lineEdit_3->setText(poliS);
               quint32 poli = 0;
@@ -78,21 +79,47 @@ MainWindow::MainWindow(QWidget *parent) :
                   poli |= 1 << (quint32)poliS.section('+', b, b).toUInt();
               //qDebug() << bin << poli;
 
-              QList<quint32> randlist = randSeq((quint32)ui->lineEdit_2->text().toUInt(), poli, (quint32)poliS.section('+', 0, 0).toUInt());
-              //qDebug() << randlist << randlist.length();
+              QList<quint32> randlist = randSeq((quint32)ui->lineEdit_2->text().toUInt(),
+                                                poli, (quint32)poliS.section('+', 0, 0).toUInt());
+              QList<QRgb> pixelList;
 
-              QList<QImage> tmp;
+               for(quint32 h = 0; h < (quint32)im1->height(); h++)
+                 for(quint32 w = 0; w < (quint32)im1->width(); w++)
+                     pixelList << im1->pixel(w, h);
 
-              quint16 h = im1->height();
-              for(auto i = 0; i < im1->width(); i++)
-                tmp << im1->copy(i,0, 1, h);
 
-              QPainter pntr(&res);
+//               qDebug() << randlist.length();
+               for(quint32 block = 0; block < (quint32)pixelList.length();
+                   block += (quint32)randlist.length()){
+//                   qDebug() << block;
+                   for(quint32 i = 0; i < (quint32)randlist.length(); i++){
+                       pixelList.swap(i + block, randlist[i]-1 + block);   //вроде работает, но хз
+                     }
+                 }
 
-              for(int i = 0; i < im1->width(); i++){
-                  pntr.drawImage(i, 0, tmp[randlist[i]-1]);
-                  ui->modlabel->setPixmap(QPixmap::fromImage(res));
-              }
+               quint32 imwidth = im1->width();
+
+               for(quint32 h = 0; h < (quint32)im1->height(); h++)
+                 for(quint32 w = 0; w < imwidth; w++)
+                   res.setPixel(w, h, pixelList[h * imwidth + w]);
+
+               ui->modlabel->setPixmap(QPixmap::fromImage(res));
+
+
+//              qDebug() << randlist << randlist.length();
+
+//              QList<QImage> tmp;
+
+//              quint16 h = im1->height();
+//              for(auto i = 0; i < im1->width(); i++)
+//                tmp << im1->copy(i,0, 1, h);
+
+//              QPainter pntr(&res);
+
+//              for(int i = 0; i < im1->width(); i++){
+//                  pntr.drawImage(i, 0, tmp[randlist[i]-1]);
+//                  ui->modlabel->setPixmap(QPixmap::fromImage(res));
+//              }
           }
         }
 
@@ -164,9 +191,9 @@ QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
 {
     QList<QString> poli_list;
     poli_list << "x5+x2+1" << "x6+x1+1" << "x7+x3+1" << "x9+x4+1" << "x10+x3+1"
-              << "x11+x2+1" << "x12+x1+1" << "x13+x1+1" << "x14+x1+1" << "x15+x4+1"
-              << "x16+x7+1" << "x17+x3+1" << "x18+x7+1" << "x19+x7+1" << "x20+x3+1"
-              << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x9+1"
+              << "x11+x2+1" << "x12+x6+x4+x1+1" << "x13+x4+x3+x1+1" << "x14+x10+x6+x+1" << "x15+x1+1"
+              << "x16+x12+x3+x1+1" << "x17+x3+1" << "x18+x7+1" << "x19+x5+x2+x1+1" << "x20+x3+1"
+              << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x3+1"
               << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"
 //              << "x39+x4+1" << "x41+x20+1" << "x47+x20+1" << "x49+x22+1";
 
