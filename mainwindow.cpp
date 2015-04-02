@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->modlabel_2->setScaledContents(true);
   ui->horizontalSlider->setSingleStep(1);
   ui->horizontalSlider->setEnabled(false);
-  ui->lineEdit_2->setEnabled(false);
+  //ui->label_4->setEnabled(false);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->orlabel_2->setPixmap(*pm);
 
       divs = new QVector<quint32>(dividers(im1->width()*im1->height()));
-      qDebug() << *divs;
+      //qDebug() << *divs;
       ui->horizontalSlider->setRange(0, divs->size() - 1);
       ui->horizontalSlider->setEnabled(true);
       ui->horizontalSlider->setValue(1);
@@ -50,14 +50,16 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
   QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
-                   [=](){ui->lineEdit_2->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
-  QObject::connect(ui->lineEdit_2, &QLineEdit::textEdited, [=](){
-                   ui->horizontalSlider->setValue(ui->lineEdit_2->text().toInt());});
+                   [=](){ui->label_4->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
+  //QObject::connect(ui->label_4, &QLineEdit::textEdited, [=](){
+  //                 ui->horizontalSlider->setValue(ui->label_4->text().toInt());});
 
   ui->pushButton_2->setText("=>");
   ui->pushButton_2->setMinimumSize(50,50);
   ui->pushButton_3->setText("=>");
   ui->pushButton_3->setMinimumSize(50,50);
+  ui->label_3->setText("");
+  ui->label_4->setText("");
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
       if(ui->lineEdit->text().isEmpty())
@@ -66,13 +68,17 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im1->size(), QImage::Format_RGB32);
           res = *im1;
-          QString poliS = sel_poli((quint32)ui->lineEdit_2->text().toUInt()); //длину ключа должна передавать
+          QString poliS = sel_poli((quint32)ui->label_4->text().toUInt());
           if(poliS == "!")
               QMessageBox::warning(this, tr("Ошибка!"),
                                    tr("Нет подходящего полинома под данную длину ключа."),
                                    QMessageBox::Ok, QMessageBox::NoButton);
           else{
-              ui->lineEdit_3->setText(poliS);
+              QString str = poliS;
+              str.replace("x", "x<span style=\" vertical-align:super;\">");
+              str.replace("+", "</span>+");
+              str = "<html><head/><body><p><span style=\" font-size:12pt;\">Полином: " + str + "</span</p></body></html>";
+              ui->label_3->setText(str);
               quint32 poli = 0;
               poliS.replace("+1", "+0");
               poliS.remove(QChar('x'), Qt::CaseInsensitive);
@@ -81,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
                   poli |= 1 << (quint32)poliS.section('+', b, b).toUInt();
               //qDebug() << bin << poli;
 
-              QList<quint32> randlist = randSeq((quint32)ui->lineEdit_2->text().toUInt(),
+              QList<quint32> randlist = randSeq((quint32)ui->label_4->text().toUInt(),
                                                 poli, (quint32)poliS.section('+', 0, 0).toUInt());
               QList<QRgb> pixelList;
 
@@ -90,26 +96,29 @@ MainWindow::MainWindow(QWidget *parent) :
                      pixelList << im1->pixel(w, h);
 
 
-//               qDebug() << randlist.length();
+//               //qDebug() << randlist.length();
                for(quint32 block = 0; block < (quint32)pixelList.length();
                    block += (quint32)randlist.length()){
-//                   qDebug() << block;
+//                   //qDebug() << block;
                    for(quint32 i = 0; i < (quint32)randlist.length(); i++){
                        pixelList.swap(i + block, randlist[i] - 1 + block);   //вроде работает, но хз
                      }
                  }
 
                quint32 imwidth = im1->width();
+               //qDebug() << pixelList;
 
 
                for(quint32 h = 0; h < (quint32)im1->height(); h++)
-                 for(quint32 w = 0; w < imwidth; w++)
+                 for(quint32 w = 0; w < imwidth; w++){
                    res.setPixel(w, h, pixelList[h * imwidth + w]);
+                   //qDebug() << h * imwidth + w << " h=" << h << " w=" << w;
+                 }
 
                ui->modlabel->setPixmap(QPixmap::fromImage(res));
 
 
-//              qDebug() << randlist << randlist.length();
+//              //qDebug() << randlist << randlist.length();
 
 //              QList<QImage> tmp;
 
@@ -133,9 +142,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
-  delete im1;
-  delete im2;
-  delete divs;
+  //delete im1;
+  //delete im2;
+  //delete divs;
 }
 
 QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- степень многочлена
@@ -194,7 +203,7 @@ QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
 {
     QList<QString> poli_list;
     poli_list << "x5+x2+1" << "x6+x1+1" << "x7+x3+1" << "x9+x4+1" << "x10+x3+1"
-              << "x11+x2+1" << "x12+x6+x4+x1+1" << "x13+x4+x3+x1+1" << "x14+x10+x6+x+1" << "x15+x1+1"
+              << "x11+x2+1" << "x12+x6+x4+x1+1" << "x13+x4+x3+x1+1" << "x14+x10+x6+x1+1" << "x15+x1+1"
               << "x16+x12+x3+x1+1" << "x17+x3+1" << "x18+x7+1" << "x19+x5+x2+x1+1" << "x20+x3+1"
               << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x3+1"
               << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"

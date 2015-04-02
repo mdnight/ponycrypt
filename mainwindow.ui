@@ -66,24 +66,30 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_2">
-            <property name="maximumSize">
+           <widget class="QLabel" name="label_4">
+            <property name="minimumSize">
              <size>
-              <width>70</width>
-              <height>16777215</height>
+              <width>60</width>
+              <height>0</height>
              </size>
+            </property>
+            <property name="text">
+             <string>TextLabel</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_3">
+            <property name="minimumSize">
+             <size>
+              <width>230</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
              <string>Полином:</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lineEdit_3"/>
           </item>
          </layout>
         </item>
