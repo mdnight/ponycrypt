@@ -116,22 +116,6 @@ MainWindow::MainWindow(QWidget *parent) :
                  }
 
                ui->modlabel->setPixmap(QPixmap::fromImage(res));
-
-
-//              //qDebug() << randlist << randlist.length();
-
-//              QList<QImage> tmp;
-
-//              quint16 h = im1->height();
-//              for(auto i = 0; i < im1->width(); i++)
-//                tmp << im1->copy(i,0, 1, h);
-
-//              QPainter pntr(&res);
-
-//              for(int i = 0; i < im1->width(); i++){
-//                  pntr.drawImage(i, 0, tmp[randlist[i]-1]);
-//                  ui->modlabel->setPixmap(QPixmap::fromImage(res));
-//              }
           }
         }
 
@@ -142,9 +126,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
-  //delete im1;
-  //delete im2;
-  //delete divs;
 }
 
 QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- степень многочлена
