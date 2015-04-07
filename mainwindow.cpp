@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QPainter>
 #include <QMessageBox>
+#include <QBitArray>
+#include <bitset>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -19,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->modlabel_2->setScaledContents(true);
   ui->horizontalSlider->setSingleStep(1);
   ui->horizontalSlider->setEnabled(false);
-  //ui->label_4->setEnabled(false);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -60,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->pushButton_3->setMinimumSize(50,50);
   ui->label_3->setText("");
   ui->label_4->setText("");
+  //ui->label_6->setText("");
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
       if(ui->lineEdit->text().isEmpty())
@@ -119,6 +121,22 @@ MainWindow::MainWindow(QWidget *parent) :
           }
         }
 
+    });
+
+  QObject::connect(ui->pushButton_3, &QPushButton::clicked, [=](){
+      if(ui->lineEdit->text().isEmpty())
+        QMessageBox::warning(this, tr("Ошибка!"),
+                             tr("Не выбран файл."), QMessageBox::Ok, QMessageBox::NoButton);
+      else {
+          QImage res(im2->size(), QImage::Format_RGB32);
+          QString *dataString = new QString("");
+          for(auto i = 0; i < im2->byteCount(); i++)
+            *dataString += QString::fromStdString(std::bitset<8>(*(im2->bits() + i)).to_string()); //ГОТОВО!!!
+
+          QHash<QString, QString> *replTable = new QHash<QString, QString>(); //таблица для простой замены
+
+
+        }
     });
 
 }
