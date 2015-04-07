@@ -21,6 +21,9 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->modlabel_2->setScaledContents(true);
   ui->horizontalSlider->setSingleStep(1);
   ui->horizontalSlider->setEnabled(false);
+  ui->radioButton->setChecked(true);
+  ui->horizontalSlider_2->setSingleStep(1);
+  ui->horizontalSlider_2->setEnabled(false);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -48,20 +51,34 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->horizontalSlider->setEnabled(true);
       ui->horizontalSlider->setValue(1);
       ui->horizontalSlider->setValue(0);
+
+      replDivs = new QVector<quint32>;
+      dataString = new QString("");
+      for(auto i = 0; i < im2->byteCount(); i++)
+        *dataString += QString::fromStdString(std::bitset<8>(*(im2->bits() + i)).to_string());
+      for(auto i: dividers(dataString->length())){
+          if(i <= 10)
+            replDivs->append(i);
+          else
+            continue;
+        }
+      ui->horizontalSlider_2->setRange(0, replDivs->size() - 1);
+      ui->horizontalSlider_2->setEnabled(true);
+      ui->horizontalSlider_2->setValue(1);
+      ui->horizontalSlider_2->setValue(0);
     });
 
   QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
                    [=](){ui->label_4->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
-  //QObject::connect(ui->label_4, &QLineEdit::textEdited, [=](){
-  //                 ui->horizontalSlider->setValue(ui->label_4->text().toInt());});
-
+  QObject::connect(ui->horizontalSlider_2, &QSlider::valueChanged,
+                   [=](){ui->label_5->setText(QString::number(replDivs->at(ui->horizontalSlider_2->value())));});
   ui->pushButton_2->setText("=>");
   ui->pushButton_2->setMinimumSize(50,50);
   ui->pushButton_3->setText("=>");
   ui->pushButton_3->setMinimumSize(50,50);
   ui->label_3->setText("");
   ui->label_4->setText("");
-  //ui->label_6->setText("");
+  ui->label_5->setText("");
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
       if(ui->lineEdit->text().isEmpty())
@@ -129,13 +146,17 @@ MainWindow::MainWindow(QWidget *parent) :
                              tr("Не выбран файл."), QMessageBox::Ok, QMessageBox::NoButton);
       else {
           QImage res(im2->size(), QImage::Format_RGB32);
-          QString *dataString = new QString("");
-          for(auto i = 0; i < im2->byteCount(); i++)
-            *dataString += QString::fromStdString(std::bitset<8>(*(im2->bits() + i)).to_string()); //ГОТОВО!!!
 
-          QHash<QString, QString> *replTable = new QHash<QString, QString>(); //таблица для простой замены
+          if(ui->radioButton->isChecked()){
+              QHash<QString, QString> *repltable = new QHash<QString, QString>;
 
-
+            }
+          else if(ui->radioButton_2->isChecked()){
+              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
+            }
+          else if(ui->radioButton_3->isChecked()){
+              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
+            }
         }
     });
 

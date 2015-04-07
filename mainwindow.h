@@ -29,6 +29,8 @@ signals:
 private:
   Ui::MainWindow *ui;
   QVector<quint32> *divs;
+  QVector<quint32> *replDivs;
+  QString *dataString;
 };
 
 #endif // MAINWINDOW_H
