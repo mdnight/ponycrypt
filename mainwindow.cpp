@@ -149,7 +149,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
           if(ui->radioButton->isChecked()){
               QHash<QString, QString> *repltable = new QHash<QString, QString>;
-
+              //QList<quint32> *replSeq = new QList<quint32>(randSeq(ui->horizontalSlider_2->value(), )) //
+              for(quint32 i = 0; i < dataString->length(); i+= ui->horizontalSlider_2->value()){
+                  if(repltable->contains(dataString->mid(i, ui->horizontalSlider_2->value()))){
+                      //выполнение замены
+                    }
+                  else;
+                    //добавление в словарь и выполнение замены
+                }
             }
           else if(ui->radioButton_2->isChecked()){
               QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
