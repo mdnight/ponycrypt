@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->horizontalSlider_2->setSingleStep(1);
   ui->horizontalSlider_2->setEnabled(false);
 
+
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
                                                         QUrl(QCoreApplication::applicationDirPath()),
@@ -80,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->label_3->setText("");
   ui->label_4->setText("");
   ui->label_5->setText("");
+
+
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
       if(ui->lineEdit->text().isEmpty())
@@ -205,8 +208,12 @@ QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- 
   //qDebug() << len << n;
   poli = poli & (((n << 1) - 1) >> 1); //убирается первая единица из полинома
   //должно быть k < n !!!
-  srand(time(0));
-  randd=random() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
+
+  long long x;
+  asm("rdtsc" : "=A"(x));  //инициализация
+  qsrand(x);               //генератора
+
+  randd=qrand() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
 
   for(quint32 i = 0; i<n-1; i++){
       quint32 tmp = poli & randd;

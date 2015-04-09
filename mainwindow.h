@@ -5,6 +5,7 @@
 #include <QByteArray>
 #include <cstdlib>
 #include <QBitmap>
+#include <QTime>
 
 namespace Ui {
   class MainWindow;
