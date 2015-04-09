@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QBitArray>
 #include <bitset>
-#include <unistd.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -258,7 +257,7 @@ QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
               << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x3+1"
               << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"
 //              << "x39+x4+1" << "x41+x20+1" << "x47+x20+1" << "x49+x22+1";
-//"x12+x6+x4+x1+1" неправильный
+
     quint32 bit_key = 0; //количество бит в длине ключа
 
     for(quint32 tmp = len_key; tmp != 0; bit_key++){
