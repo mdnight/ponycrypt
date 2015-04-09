@@ -34,6 +34,14 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_5">
+        <property name="text">
+         <string>Сохранить
+маскированное</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="1" column="0">
@@ -88,13 +96,6 @@
             </property>
             <property name="text">
              <string>Полином:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_5">
-            <property name="text">
-             <string>PushButton</string>
             </property>
            </widget>
           </item>
@@ -257,13 +258,6 @@
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>TextLabel</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_4">
-            <property name="text">
-             <string>PushButton</string>
             </property>
            </widget>
           </item>

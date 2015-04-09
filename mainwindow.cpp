@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QBitArray>
 #include <bitset>
+#include <unistd.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -27,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
-                                                        QUrl(QCoreApplication::applicationDirPath()), "Bitmap (*.bmp)").toString(QUrl::PreferLocalFile));
+                                                        QUrl(QCoreApplication::applicationDirPath()),
+                                                        "Bitmap (*.bmp)").toString(QUrl::PreferLocalFile));
       QFile *file = new QFile(ui->lineEdit->text());
       file->open(QIODevice::ReadOnly);
       bytepic = new QByteArray(file->readAll());
@@ -147,21 +149,42 @@ MainWindow::MainWindow(QWidget *parent) :
       else {
           QImage res(im2->size(), QImage::Format_RGB32);
 
+          quint32 len_block = (quint32)ui->label_5->text().toUInt();
+
           if(ui->radioButton->isChecked()){
-              QHash<QString, QString> *repltable = new QHash<QString, QString>;
+              //QHash<QString, QString> *repltable = new QHash<QString, QString>;
+              QHash<QString, QString> repltable;
+
+              QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
+
+              for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
+                  repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')] =
+                          QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0');
+              }
+              //qDebug() << repltable;
               //QList<quint32> *replSeq = new QList<quint32>(randSeq(ui->horizontalSlider_2->value(), )) //
-              for(quint32 i = 0; i < dataString->length(); i+= ui->horizontalSlider_2->value()){
-                  if(repltable->contains(dataString->mid(i, ui->horizontalSlider_2->value()))){
-                      //выполнение замены
-                    }
-                  else;
-                    //добавление в словарь и выполнение замены
-                }
+              //for(quint32 i = 0; i < datastring->length(); i+= ui->horizontalslider_2->value()){
+              //    if(repltable->contains(datastring->mid(i, ui->horizontalslider_2->value()))){
+              //        //выполнение замены
+              //      }
+              //    else;
+              //      //добавление в словарь и выполнение замены
+              //  }
             }
-          else if(ui->radioButton_2->isChecked()){
-              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
+          else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
+              QHash<QString, QList<QString>> repltable;
+              quint32 kolvo_tab = 2; //кол-во таблиц
+              for(quint32 k = 0; k < kolvo_tab; k++) {
+                  QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
+                  for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
+                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')]
+                              .append(QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0'));
+                  }
+              }
+              qDebug() << repltable;
             }
           else if(ui->radioButton_3->isChecked()){
+              //здесь тоже самое, что и в radioButton_2, только kolvo_tab = кол-во_пикселей / длину_блока
               QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
             }
         }
@@ -235,7 +258,7 @@ QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
               << "x21+x2+1" << "x22+x1+1" << "x23+x5+1" << "x25+x3+1" << "x28+x3+1"
               << "x29+x2+1" << "x31+x3+1";// << "x33+x13+1" << "x35+x2+1" << "x36+x11+1"
 //              << "x39+x4+1" << "x41+x20+1" << "x47+x20+1" << "x49+x22+1";
-
+//"x12+x6+x4+x1+1" неправильный
     quint32 bit_key = 0; //количество бит в длине ключа
 
     for(quint32 tmp = len_key; tmp != 0; bit_key++){
