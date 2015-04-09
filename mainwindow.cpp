@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QBitArray>
 #include <bitset>
+#include <time.h>  //Для clock_gettime
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -209,9 +210,13 @@ QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- 
   poli = poli & (((n << 1) - 1) >> 1); //убирается первая единица из полинома
   //должно быть k < n !!!
 
-  long long x;
-  asm("rdtsc" : "=A"(x));  //инициализация
-  qsrand(x);               //генератора
+  //long long x;            //иницилизация генератора
+  //asm("rdtsc" : "=A"(x)); //с помощью тактов процессора
+  //qsrand(x);
+
+  struct timespec mt1;                      //инициализация
+  clock_gettime (CLOCK_REALTIME, &mt1);     //генератора
+  qsrand(uint(mt1.tv_nsec));                //с помощью текущего времени (наносекунды)
 
   randd=qrand() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
 
