@@ -157,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent) :
           if(ui->radioButton->isChecked()){
               //QHash<QString, QString> *repltable = new QHash<QString, QString>;
               QHash<QString, QString> repltable;
+              QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
 
               QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
 
@@ -166,10 +167,10 @@ MainWindow::MainWindow(QWidget *parent) :
               }
 
               quint32 step = ui->label_5->text().toUInt();
-              for(quint32 i = 0; i < dataString->length(); i += step)
-                  dataString->replace(i, step, repltable.value(dataString->mid(i, step)));
-              for(quint32 i = 0; i < dataString->length(); i += 8)
-                  *(res.bits() + i/8) = (uchar)dataString->mid(i, 8).toUInt(0, 2);
+              for(quint32 i = 0; i < ldataString->length(); i += step)
+                  ldataString->replace(i, step, repltable.value(ldataString->mid(i, step)));
+              for(quint32 i = 0; i < ldataString->length(); i += 8)
+                  *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
               ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
             }
           else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
