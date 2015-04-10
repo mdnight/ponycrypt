@@ -164,15 +164,13 @@ MainWindow::MainWindow(QWidget *parent) :
                   repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')] =
                           QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0');
               }
-              //qDebug() << repltable;
-              //QList<quint32> *replSeq = new QList<quint32>(randSeq(ui->horizontalSlider_2->value(), )) //
-              //for(quint32 i = 0; i < datastring->length(); i+= ui->horizontalslider_2->value()){
-              //    if(repltable->contains(datastring->mid(i, ui->horizontalslider_2->value()))){
-              //        //выполнение замены
-              //      }
-              //    else;
-              //      //добавление в словарь и выполнение замены
-              //  }
+
+              quint32 step = ui->label_5->text().toUInt();
+              for(quint32 i = 0; i < dataString->length(); i += step)
+                  dataString->replace(i, step, repltable.value(dataString->mid(i, step)));
+              for(quint32 i = 0; i < dataString->length(); i += 8)
+                  *(res.bits() + i/8) = (uchar)dataString->mid(i, 8).toUInt(0, 2);
+              ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
             }
           else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
               QHash<QString, QList<QString>> repltable;
