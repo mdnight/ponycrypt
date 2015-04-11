@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->radioButton->setChecked(true);
   ui->horizontalSlider_2->setSingleStep(1);
   ui->horizontalSlider_2->setEnabled(false);
-
+  ui->spinBox->setEnabled(false);
 
   QObject::connect(ui->pushButton, &QPushButton::clicked, [=](){
       ui->lineEdit->setText(QFileDialog::getOpenFileUrl(NULL, tr("Открыть файл"),
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->orlabel_2->setPixmap(*pm);
 
       divs = new QVector<quint32>(dividers(im1->width()*im1->height()));
-      //qDebug() << *divs;
+
       ui->horizontalSlider->setRange(0, divs->size() - 1);
       ui->horizontalSlider->setEnabled(true);
       ui->horizontalSlider->setValue(1);
@@ -69,12 +69,18 @@ MainWindow::MainWindow(QWidget *parent) :
       ui->horizontalSlider_2->setEnabled(true);
       ui->horizontalSlider_2->setValue(1);
       ui->horizontalSlider_2->setValue(0);
+
+      ui->spinBox->setMinimum(2);
+      ui->spinBox->setEnabled(true);
     });
 
   QObject::connect(ui->horizontalSlider, &QSlider::valueChanged,
                    [=](){ui->label_4->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
-  QObject::connect(ui->horizontalSlider_2, &QSlider::valueChanged,
-                   [=](){ui->label_5->setText(QString::number(replDivs->at(ui->horizontalSlider_2->value())));});
+  QObject::connect(ui->horizontalSlider_2, &QSlider::valueChanged,[=]() {
+      ui->label_5->setText(QString::number(replDivs->at(ui->horizontalSlider_2->value())));
+      ui->spinBox->setMaximum((dataString->length()) / (ui->label_5->text().toUInt()) - 1);
+  });
+
   ui->pushButton_2->setText("=>");
   ui->pushButton_2->setMinimumSize(50,50);
   ui->pushButton_3->setText("=>");
@@ -82,8 +88,6 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->label_3->setText("");
   ui->label_4->setText("");
   ui->label_5->setText("");
-
-
 
   QObject::connect(ui->pushButton_2, &QPushButton::clicked, [=](){
       if(ui->lineEdit->text().isEmpty())
@@ -109,7 +113,6 @@ MainWindow::MainWindow(QWidget *parent) :
               poliS.replace("++", "+1+");
               for(int b = 0; b <= poliS.count("+"); b++)
                   poli |= 1 << (quint32)poliS.section('+', b, b).toUInt();
-              //qDebug() << bin << poli;
 
               QList<quint32> randlist = randSeq((quint32)ui->label_4->text().toUInt(),
                                                 poli, (quint32)poliS.section('+', 0, 0).toUInt());
@@ -119,24 +122,18 @@ MainWindow::MainWindow(QWidget *parent) :
                  for(quint32 w = 0; w < (quint32)im1->width(); w++)
                      pixelList << im1->pixel(w, h);
 
-
-//               //qDebug() << randlist.length();
                for(quint32 block = 0; block < (quint32)pixelList.length();
                    block += (quint32)randlist.length()){
-//                   //qDebug() << block;
                    for(quint32 i = 0; i < (quint32)randlist.length(); i++){
                        pixelList.swap(i + block, randlist[i] - 1 + block);   //вроде работает, но хз
                      }
                  }
 
                quint32 imwidth = im1->width();
-               //qDebug() << pixelList;
-
 
                for(quint32 h = 0; h < (quint32)im1->height(); h++)
                  for(quint32 w = 0; w < imwidth; w++){
                    res.setPixel(w, h, pixelList[h * imwidth + w]);
-                   //qDebug() << h * imwidth + w << " h=" << h << " w=" << w;
                  }
 
                ui->modlabel->setPixmap(QPixmap::fromImage(res));
@@ -166,16 +163,18 @@ MainWindow::MainWindow(QWidget *parent) :
                           QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0');
               }
 
-              quint32 step = ui->label_5->text().toUInt();
-              for(quint32 i = 0; i < ldataString->length(); i += step)
-                  ldataString->replace(i, step, repltable.value(ldataString->mid(i, step)));
+              //quint32 step = ui->label_5->text().toUInt();    // step == len_block
+              for(quint32 i = 0; i < ldataString->length(); i += len_block)
+                  ldataString->replace(i, len_block, repltable.value(ldataString->mid(i, len_block)));
               for(quint32 i = 0; i < ldataString->length(); i += 8)
                   *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
               ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
             }
-          else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
+          else if(ui->radioButton_2->isChecked()){
               QHash<QString, QList<QString>> repltable;
-              quint32 kolvo_tab = 2; //кол-во таблиц
+              QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
+              quint32 kolvo_tab = (quint32)ui->spinBox->text().toUInt(); //кол-во таблиц
+
               for(quint32 k = 0; k < kolvo_tab; k++) {
                   QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
                   for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
@@ -183,11 +182,36 @@ MainWindow::MainWindow(QWidget *parent) :
                               .append(QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0'));
                   }
               }
-              qDebug() << repltable;
+
+              //quint32 step = ui->label_5->text().toUInt();    // step == len_block
+              for(quint32 i = 0, num_block = 0; i < ldataString->length(); i += len_block, num_block++)
+                  ldataString->replace(i, len_block, repltable.value(ldataString->mid(i, len_block))[num_block % kolvo_tab]);
+
+              for(quint32 i = 0; i < ldataString->length(); i += 8)
+                  *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
+              ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
             }
           else if(ui->radioButton_3->isChecked()){
               //здесь тоже самое, что и в radioButton_2, только kolvo_tab = кол-во_пикселей / длину_блока
-              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
+              QHash<QString, QList<QString>> repltable;
+              QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
+              quint32 kolvo_tab = (dataString->length()) / len_block; //кол-во таблиц
+
+              for(quint32 k = 0; k < kolvo_tab; k++) {
+                  QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
+                  for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
+                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')]
+                              .append(QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0'));
+                  }
+              }
+
+              //quint32 len_block = ui->label_5->text().toUInt();
+              for(quint32 i = 0, num_block = 0; i < ldataString->length(); i += len_block, num_block++)
+                  ldataString->replace(i, len_block, repltable.value(ldataString->mid(i, len_block))[num_block]);
+
+              for(quint32 i = 0; i < ldataString->length(); i += 8)
+                  *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
+              ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
             }
         }
     });
@@ -205,6 +229,7 @@ MainWindow::MainWindow(QWidget *parent) :
           file.close();
           break;
       }
+
       case 1:{
           QString path = QFileDialog::getSaveFileName(this, tr("Сохранить"), "./", tr("(*.bmp)"));
           QFile file(path);
@@ -212,13 +237,16 @@ MainWindow::MainWindow(QWidget *parent) :
               QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка сохранения"), QMessageBox::Ok, QMessageBox::NoButton);
               return -1;
           }
+
           ui->modlabel_2->pixmap()->save(&file, "BMP");
           file.close();
           break;
       }
       }
-
   });
+
+
+
 
 }
 
@@ -233,7 +261,6 @@ QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- 
   quint32 n=1, randd;
 
   n <<= st;
-  //qDebug() << len << n;
   poli = poli & (((n << 1) - 1) >> 1); //убирается первая единица из полинома
   //должно быть k < n !!!
 
@@ -266,7 +293,6 @@ QVector<quint32> MainWindow::dividers(quint32 n)
   if (n == 0)
     return QVector<quint32>();
 
-  // Вектор делителей (пока содержит только само число)
   QVector<quint32> divs(1, n);
 
   // Если проверяем 1 - выводим уже готовый вектор, содержащий только саму 1
@@ -280,10 +306,6 @@ QVector<quint32> MainWindow::dividers(quint32 n)
       // Если очередное число является делителем, добавляем его в вектор
       divs.push_back(d);
 
-  // Добавляем делитель любого из чисел - 1
-  //divs.push_back(1);
-
-  // Возвращаем найденные делители
   return divs;
 }
 
@@ -302,13 +324,12 @@ QString MainWindow::sel_poli(quint32 len_key) //выбор полинома
     for(quint32 tmp = len_key; tmp != 0; bit_key++){
         tmp >>= 1;
     }
-    //qDebug() << bit_key;
+
     QString poli;
     for(int i = 0; i < poli_list.size(); i++){
         poli = poli_list.at(i);
         if(poli.section('+', 0, 0).remove(QChar('x')).toUInt() > bit_key)
             return poli;
     }
-    //qDebug() << "выбранный полином: " << poli;
     return "!";
 }
