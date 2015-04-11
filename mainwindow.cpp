@@ -192,6 +192,34 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     });
 
+  QObject::connect(ui->pushButton_5, &QPushButton::clicked, [=](){
+      switch (ui->tabWidget->tabBar()->currentIndex()){
+      case 0:{
+          QString path = QFileDialog::getSaveFileName(this, tr("Сохранить"), "./", tr("(*.bmp)"));
+          QFile file(path);
+          if(!file.open(QIODevice::WriteOnly)){
+              QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка сохранения"), QMessageBox::Ok, QMessageBox::NoButton);
+              return -1;
+          }
+          ui->modlabel->pixmap()->save(&file, "BMP");
+          file.close();
+          break;
+      }
+      case 1:{
+          QString path = QFileDialog::getSaveFileName(this, tr("Сохранить"), "./", tr("(*.bmp)"));
+          QFile file(path);
+          if(!file.open(QIODevice::WriteOnly)){
+              QMessageBox::critical(this, tr("Ошибка"), tr("Ошибка сохранения"), QMessageBox::Ok, QMessageBox::NoButton);
+              return -1;
+          }
+          ui->modlabel_2->pixmap()->save(&file, "BMP");
+          file.close();
+          break;
+      }
+      }
+
+  });
+
 }
 
 MainWindow::~MainWindow()
