@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QBitArray>
 #include <bitset>
-#include <time.h>  //Для clock_gettime
+#include <chrono>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -221,6 +221,7 @@ MainWindow::MainWindow(QWidget *parent) :
                       val.append(QByteArray::number(psp->at(i)-1, 2).rightJustified(len_block, '0'));
                       repltable->insert(tmp, val);
                   }
+                  delete psp;
               }
 
               //quint32 len_block = ui->label_5->text().toUInt();
@@ -264,10 +265,6 @@ MainWindow::MainWindow(QWidget *parent) :
       }
       }
   });
-
-
-
-
 }
 
 MainWindow::~MainWindow()
@@ -284,13 +281,8 @@ QList<quint32> MainWindow::randSeq(quint32 k, quint32 poli, quint32 st) //st -- 
   poli = poli & (((n << 1) - 1) >> 1); //убирается первая единица из полинома
   //должно быть k < n !!!
 
-  //long long x;            //иницилизация генератора
-  //asm("rdtsc" : "=A"(x)); //с помощью тактов процессора
-  //qsrand(x);
-
-  struct timespec mt1;                      //инициализация
-  clock_gettime (CLOCK_REALTIME, &mt1);     //генератора
-  qsrand(uint(mt1.tv_nsec));                //с помощью текущего времени (наносекунды)
+  qsrand(std::chrono::duration_cast<std::chrono::nanoseconds> //Инициализация генератора
+        (std::chrono::system_clock::now().time_since_epoch()).count()); //с помощью <chrono>
 
   randd=qrand() % (n - 1) + 1; //иницилизирующее число (0 < randd < n)
 
