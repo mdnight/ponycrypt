@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
                    [=](){ui->label_4->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
   QObject::connect(ui->horizontalSlider_2, &QSlider::valueChanged,[=]() {
       ui->label_5->setText(QString::number(replDivs->at(ui->horizontalSlider_2->value())));
-      ui->spinBox->setMaximum((dataString->length()) / (ui->label_5->text().toUInt()) - 1);
+      ui->spinBox->setMaximum((dataString->length()) / (ui->label_5->text().toUInt()) );//- 1);
   });
 
   ui->pushButton_2->setText("=>");
@@ -175,65 +175,52 @@ MainWindow::MainWindow(QWidget *parent) :
               delete psp;
 
             }
-          else if(ui->radioButton_2->isChecked()){
-              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
+          else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
               QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
-              quint32 kolvo_tab = (quint32)ui->spinBox->text().toUInt(); //кол-во таблиц
+              quint32 kolvo_tab = ui->spinBox->text().toUInt(); //для 2 режима
+              //quint32 kolvo_tab = (dataString->length()) / len_block; //для 3 режима
 
-              for(quint32 k = 0; k < kolvo_tab; k++) {
-                  QList<quint32> *psp = new QList<quint32>(randSeq(1 << len_block, 0b10000000011011, 13));
+              for(quint32 j = 0; j < kolvo_tab; j++) {
+                  QHash<QString, QString> repltable;
+                  QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
+
                   for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
-                      auto key = QByteArray::number(i, 2).rightJustified(len_block, '0');
-                      auto val = repltable->take(key);
-                      val << QByteArray::number(psp->at(i)-1, 2).rightJustified(len_block, '0');
-                      repltable->value(key);
-                      repltable->insert(key, val);
-//                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')]
-//                          .append(QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0'));
-                    }
-                  delete psp;
-                }
-
-              //quint32 step = ui->label_5->text().toUInt();    // step == len_block
-              for(quint32 i = 0, num_block = 0; i < ldataString->length(); i += len_block, num_block++)
-                ldataString->replace(i, len_block, repltable->value(ldataString->mid(i, len_block))[num_block % kolvo_tab]);
-
-              for(quint32 i = 0; i < ldataString->length(); i += 8)
-                *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
-              ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
-
-              delete repltable;
-              delete ldataString;
-             }
-          else if(ui->radioButton_3->isChecked()){
-              //здесь тоже самое, что и в radioButton_2, только kolvo_tab = кол-во_пикселей / длину_блока
-              QHash<QString, QList<QString>> *repltable = new QHash<QString, QList<QString>>;
-              QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
-              quint32 kolvo_tab = (dataString->length()) / len_block; //кол-во таблиц
-
-              for(quint32 k = 0; k < kolvo_tab; k++) {
-                  QList<quint32> *psp = new QList<quint32>(randSeq(1 << len_block, 0b10000000011011, 13));
-                  for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
-//                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')]
-//                              .append(QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0'));
-                      auto tmp = QByteArray::number(i, 2).rightJustified(len_block, '0');
-                      auto val = repltable->take(tmp);
-                      val.append(QByteArray::number(psp->at(i)-1, 2).rightJustified(len_block, '0'));
-                      repltable->insert(tmp, val);
+                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')] =
+                              QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0');
                   }
-                  delete psp;
-              }
 
-              //quint32 len_block = ui->label_5->text().toUInt();
-              for(quint32 i = 0, num_block = 0; i < ldataString->length(); i += len_block, num_block++)
-                  ldataString->replace(i, len_block, repltable->value(ldataString->mid(i, len_block))[num_block]);
+                  for(quint32 k = j * len_block; k < ldataString->length(); k += len_block * kolvo_tab)
+                      ldataString->replace(k, len_block, repltable.value(ldataString->mid(k, len_block)));
+              }
 
               for(quint32 i = 0; i < ldataString->length(); i += 8)
                   *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
               ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
-              delete []repltable;
-              delete []ldataString;
-            }          
+              delete ldataString;
+            }
+          else if(ui->radioButton_3->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
+              QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
+              //quint32 kolvo_tab = ui->spinBox->text().toUInt(); //для 2 режима
+              quint32 kolvo_tab = (dataString->length()) / len_block; //для 3 режима
+
+              for(quint32 j = 0; j < kolvo_tab; j++) {
+                  QHash<QString, QString> repltable;
+                  QList<quint32> psp = randSeq(1 << len_block, 0b10000000011011, 13);
+
+                  for(quint32 i = 0; i < 1 << len_block; i++ ) { //заполнение таблицы
+                      repltable[QByteArray::number(i, 2).rightJustified(len_block, '0')] =
+                              QByteArray::number(psp[i]-1, 2).rightJustified(len_block, '0');
+                  }
+
+                  for(quint32 k = j * len_block; k < ldataString->length(); k += len_block * kolvo_tab)
+                      ldataString->replace(k, len_block, repltable.value(ldataString->mid(k, len_block)));
+              }
+
+              for(quint32 i = 0; i < ldataString->length(); i += 8)
+                  *(res.bits() + i/8) = (uchar)ldataString->mid(i, 8).toUInt(0, 2);
+              ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
+              delete ldataString;
+            }
         }
     });
 
