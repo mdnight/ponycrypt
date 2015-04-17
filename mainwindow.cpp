@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
                    [=](){ui->label_4->setText(QString::number(divs->at(ui->horizontalSlider->value())));});
   QObject::connect(ui->horizontalSlider_2, &QSlider::valueChanged,[=]() {
       ui->label_5->setText(QString::number(replDivs->at(ui->horizontalSlider_2->value())));
-      ui->spinBox->setMaximum((dataString->length()) / (ui->label_5->text().toUInt()) );//- 1);
+      ui->spinBox->setMaximum((dataString->length()) / (ui->label_5->text().toUInt()) - 1);
   });
 
   ui->pushButton_2->setText("=>");
@@ -175,7 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
               delete psp;
 
             }
-          else if(ui->radioButton_2->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
+          else if(ui->radioButton_2->isChecked()){  
               QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
               quint32 kolvo_tab = ui->spinBox->text().toUInt(); //для 2 режима
               //quint32 kolvo_tab = (dataString->length()) / len_block; //для 3 режима
@@ -198,7 +198,7 @@ MainWindow::MainWindow(QWidget *parent) :
               ui->modlabel_2->setPixmap(QPixmap::fromImage(res));
               delete ldataString;
             }
-          else if(ui->radioButton_3->isChecked()){  //работает, но пролема c srand(time(0)) поэтому столбцы одинаковы
+          else if(ui->radioButton_3->isChecked()){ 
               QString *ldataString = new QString(*dataString); //копируем dataString в ldataString, чтобы dataString не изменилась
               //quint32 kolvo_tab = ui->spinBox->text().toUInt(); //для 2 режима
               quint32 kolvo_tab = (dataString->length()) / len_block; //для 3 режима
