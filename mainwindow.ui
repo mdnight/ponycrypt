@@ -242,7 +242,7 @@
               <item>
                <widget class="QRadioButton" name="radioButton_2">
                 <property name="text">
-                 <string>Таблицы меняются переодически</string>
+                 <string>Таблицы меняются периодически</string>
                 </property>
                </widget>
               </item>
